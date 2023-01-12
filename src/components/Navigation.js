@@ -1,9 +1,11 @@
-import { React, useEffect } from "react";
+import { React, useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import NavDropdown from "react-bootstrap/NavDropdown";
+import Swal from "sweetalert2";
+
 import {
   BrowserRouter as Router,
   Routes,
@@ -18,6 +20,10 @@ import Product from "../pages/Product";
 import Contact from "../pages/Contact";
 import AboutUs from "../pages/AboutUs";
 import Order from "../pages/Order";
+import Login from "../pages/Login";
+import Register from "../pages/Register";
+import Dashboard from "../pages/Dashboard";
+import FormPaket from "../pages/FormPaket";
 
 const nav1style = {
   zIndex: 9999,
@@ -35,12 +41,69 @@ const whiteText = {
   color: "white",
 };
 
+const logout_aksi = async () => {
+  let token = sessionStorage.getItem("access_token");
+  fetch("http://127.0.0.1:8000/api/logout", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+  })
+    .then((res) => res.json())
+    .then((json) => {
+      // console.log("ini respon");
+      // console.log(json);
+
+      if (json.hasOwnProperty("error")) {
+        if (!json.error) {
+          Swal.fire({
+            position: "top-center",
+            icon: "success",
+            title: "Logout Success",
+            showConfirmButton: false,
+            timer: 1500,
+          });
+
+          sessionStorage.clear();
+          window.location.href = "/";
+        } else {
+          Swal.fire({
+            position: "top-center",
+            icon: "error",
+            title: "Logout Failed",
+            showConfirmButton: false,
+            html: json.message,
+            timer: 1500,
+          });
+        }
+      } else {
+        sessionStorage.clear();
+        window.location.href = "/";
+      }
+    });
+};
+
 function Navigation() {
+  const [login_status, setLoginStatus] = useState(false);
   let location = useLocation();
 
   useEffect(() => {
+    const token = sessionStorage.getItem("access_token");
+    if (token == null || token == "undefined") {
+      // login_status = false;
+      setLoginStatus(false);
+    } else {
+      // login_status = true;
+      setLoginStatus(true);
+    }
+
     console.log("Current URL Location");
     console.log(location);
+    console.log("Status Login");
+    console.log(login_status);
+    console.log("--------------------------------");
   }, [location]);
 
   let navStyle;
@@ -49,6 +112,7 @@ function Navigation() {
   } else {
     navStyle = nav2style;
   }
+
   return (
     <>
       <div>
@@ -110,6 +174,49 @@ function Navigation() {
                   </NavDropdown.Item>
                 </NavDropdown> */}
               </Nav>
+              {(() => {
+                if (login_status) {
+                  return (
+                    <>
+                      <Nav>
+                        <Nav.Link as={Link} to={"/Dashboard"} style={whiteText}>
+                          Dashboard
+                        </Nav.Link>
+                      </Nav>
+                      <Nav>
+                        <Nav.Link onClick={logout_aksi}>
+                          <Button variant="danger">Logout</Button>
+                        </Nav.Link>
+                      </Nav>
+                    </>
+                  );
+                } else {
+                  return (
+                    <>
+                      <Nav>
+                        <Nav.Link as={Link} to={"/Login"}>
+                          <Button variant="warning">Login</Button>
+                        </Nav.Link>
+                      </Nav>
+                    </>
+                  );
+                }
+              })()}
+              {/* <Nav>
+                <Nav.Link as={Link} to={"/Login"}>
+                  <Button variant="warning">Login</Button>
+                </Nav.Link>
+              </Nav>
+              <Nav>
+                <Nav.Link as={Link} to={"/Dashboard"} style={whiteText}>
+                  Dashboard
+                </Nav.Link>
+              </Nav>
+              <Nav>
+                <Nav.Link as={Link} to={"/Login"}>
+                  <Button variant="danger">Logout</Button>
+                </Nav.Link>
+              </Nav> */}
               {/* <Nav>
                 <Nav.Link as={Link} to={"/Order"}>
                   <Button variant="warning">Order Now</Button>
@@ -126,6 +233,11 @@ function Navigation() {
         <Route path="/Contact" element={<Contact />} />
         <Route path="/AboutUs" element={<AboutUs />} />
         <Route path="/Order" element={<Order />} />
+        <Route path="/Login" element={<Login />} />
+        <Route path="/Register" element={<Register />} />
+        <Route path="/Dashboard" element={<Dashboard />} />
+
+        <Route path="/Paket/add" element={<FormPaket />} />
       </Routes>
     </>
   );

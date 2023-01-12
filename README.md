@@ -1,10 +1,10 @@
-# Wins e-Commerce
+# Frontend CyberNet
 
-Furniture e-Commerce - React JS
+Internet Provider Service - React JS
 
 ## Bio :
 
-Wini Muthia Kansha - 2110045 - Mata Kuliah Framework Programming
+Tugas UAS - Mata Kuliah Framework Programming
 
 ## Notes :
 

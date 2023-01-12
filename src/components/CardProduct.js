@@ -4,17 +4,16 @@ import { Col, Collapse, Container, Row, Button } from "react-bootstrap";
 import Card from "react-bootstrap/Card";
 import { useNavigate } from "react-router-dom";
 
-
 function currencyFormat(num) {
   // return '$' + num.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
 
-  num = parseInt(num);  
-  if (!isNaN(+num)) {// true if its a number, false if not
-    return num.toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')
+  num = parseInt(num);
+  if (!isNaN(+num)) {
+    // true if its a number, false if not
+    return num.toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
   }
-  return ""
+  return "";
 }
-
 
 function Discount(props) {
   const disc = props.amount;
@@ -39,21 +38,32 @@ function Discount(props) {
 }
 
 function CardProduct(props) {
-
   let navigate = useNavigate();
 
   async function handleClickOrder(props) {
     // event.preventDefault();
-    navigate("/Order", {state:{nameitem:props.title,priceitem:props.price, distitem:props.disc}});
+    navigate("/Order", {
+      state: {
+        nameitem: props.title,
+        priceitem: props.price,
+        distitem: props.disc,
+        idpaketitem: props.id_paket,
+      },
+    });
   }
 
+  let pathimg = props.path_photo + props.image;
+  if (props.image == "") {
+    pathimg = require("../assets/product_item/p_default.png");
+  }
   return (
     <Col>
       <Card>
         <Card.Img
           variant="top"
-          src={require("../assets/product_item/" +
-            `${props.image || "p_default.png"}`)}
+          // src={require("../assets/product_item/" +
+          //   `${props.image || "p_default.png"}`)}
+          src={pathimg}
         />
         <Card.Body>
           <Card.Title>{props.title || "Product Title"}</Card.Title>
@@ -61,7 +71,12 @@ function CardProduct(props) {
             <b>Rp. {currencyFormat(props.price) || "NA"}</b>
           </Card.Text>
           <Card.Text>{props.desc || "Product Description"}</Card.Text>
-          <Button className="btn-success" onClick={() => handleClickOrder(props)}>Order</Button>
+          <Button
+            className="btn-success"
+            onClick={() => handleClickOrder(props)}
+          >
+            Berlangganan
+          </Button>
         </Card.Body>
 
         <Discount amount={props.disc || 0} />
