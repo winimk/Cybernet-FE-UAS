@@ -238,6 +238,7 @@ function Navigation() {
         <Route path="/Dashboard" element={<Dashboard />} />
 
         <Route path="/Paket/add" element={<FormPaket />} />
+        <Route path="/Paket/edit" element={<FormPaket />} />
       </Routes>
     </>
   );

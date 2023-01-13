@@ -67,6 +67,44 @@ function Dashboard() {
       }
     }
   }, []);
+
+  const editData = (id) => {
+    history("/paket/edit", { state: { idpaket: id, jnsForm: "edit" } });
+  };
+
+  const deleteData = (id) => {
+    Swal.fire({
+      title: "Apakah anda yakin ?",
+      text: "Akan menghapus data ini",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Ya",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        let token = sessionStorage.getItem("access_token");
+        fetch("http://127.0.0.1:8000/api/delete_paket/" + id, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        })
+          .then((res) => res.json())
+          .then(
+            (json) => {
+              Swal.fire("Deleted!", "Deleted Successfully.", "success");
+              fetchViewProductAdmin();
+            },
+            (error) => {
+              alert(error);
+            }
+          );
+      }
+    });
+  };
   return (
     <>
       <Container className="py-5">
@@ -148,14 +186,18 @@ function Dashboard() {
                           <td>{data.disc}%</td>
                           <td>{data.status == 1 ? "Publish" : "Draft"}</td>
                           <td>
-                            #
-                            {/* <Button onClick={(e) => edit(data.id)}>Edit</Button>
-                          <Button
-                            onClick={(e) => deletef(data.id)}
-                            className="bg-danger"
-                          >
-                            Delete
-                          </Button> */}
+                            <Button
+                              onClick={(e) => editData(data.id_paket)}
+                              className="btn-warning"
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              onClick={(e) => deleteData(data.id_paket)}
+                              className="btn-danger"
+                            >
+                              Delete
+                            </Button>
                           </td>
                         </tr>
                       );

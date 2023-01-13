@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 
 function FormPaket() {
   const [dtjnsform, setJnsform] = useState("tambah");
+  const [dtIdPaket, setIdPaket] = useState("");
   const [dtsession, setDtsession] = useState(null);
   const [dtiduser, setIdUser] = useState("");
   const [dtnama, setNama] = useState("");
@@ -32,29 +33,6 @@ function FormPaket() {
     // this.setState({ selectedFile: event.target.files[0] });
     setGambar(event.target.files[0]);
   };
-
-  // On file upload (click the upload button)
-  // const onFileUpload = () => {
-  //   // Create an object of formData
-  //   const formData = new FormData();
-
-  //   // Update the formData object
-  //   // formData.append("myFile", this.state.dtgambar, this.state.dtgambar.name);
-  //   formData.append("myFile", dtgambar, dtgambar.name);
-
-  //   // Details of the uploaded file
-  //   // console.log(this.state.dtgambar);
-  //   console.log(dtgambar);
-
-  //   // Request made to the backend api
-  //   // Send formData object
-  //   // axios.post("api/uploadfile", formData);
-
-  //   console.log(
-  //     "------------------------------Hasil Submit----------------------------------"
-  //   );
-  //   console.log(formData);
-  // };
 
   const handleChange = (event) => {
     const name = event.target.name;
@@ -83,14 +61,19 @@ function FormPaket() {
     formdata.append("status", inputs.status);
     formdata.append("gambar_produk", dtgambar);
 
+    let linkapiform = "http://127.0.0.1:8000/api/create_paket";
+    if (dtjnsform == "edit") {
+      linkapiform = "http://127.0.0.1:8000/api/update_paket";
+      formdata.append("id_paket", dtIdPaket);
+    }
+
     var requestOptions = {
       method: "POST",
       headers: myHeaders,
       body: formdata,
       redirect: "follow",
     };
-
-    fetch("http://127.0.0.1:8000/api/create_paket", requestOptions)
+    fetch(linkapiform, requestOptions)
       .then((response) => response.text())
       .then((result) => {
         // console.log("ini respon");
@@ -132,6 +115,56 @@ function FormPaket() {
       .catch((error) => alert("error", error));
   };
 
+  const fetchPaketEdit = async (id_paket) => {
+    let token = sessionStorage.getItem("access_token");
+    fetch("http://127.0.0.1:8000/api/get_by_id_paket/" + id_paket, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then(
+        (json) => {
+          if (json.hasOwnProperty("error")) {
+            if (!json.error) {
+              setInputs((prevState) => ({
+                ...prevState,
+                nama_paket: json.data.nama_paket,
+                kecepatan: json.data.kecepatan,
+                harga: json.data.harga,
+                disc: json.data.disc,
+                status: json.data.status,
+              }));
+            } else {
+              Swal.fire({
+                position: "top-center",
+                icon: "error",
+                title: "Failed Find Data",
+                showConfirmButton: false,
+                html: json.msg,
+                timer: 1500,
+              });
+            }
+          } else {
+            Swal.fire({
+              position: "top-center",
+              icon: "error",
+              title: "Failed Find Data",
+              showConfirmButton: false,
+              html: json.message,
+              timer: 1500,
+            });
+          }
+        },
+        (error) => {
+          alert(error);
+        }
+      );
+  };
+
   useEffect(() => {
     if (
       sessionStorage.getItem("access_token") == null ||
@@ -170,6 +203,11 @@ function FormPaket() {
         ...prevState,
         id_user: get_dtsession.data.id,
       }));
+
+      if (location.state.jnsForm == "edit") {
+        setIdPaket(location.state.idpaket);
+        fetchPaketEdit(location.state.idpaket);
+      }
     }
   }, []);
 
@@ -179,7 +217,12 @@ function FormPaket() {
       <br />
       <Form onSubmit={SaveForm}>
         <Form.Group className="mb-3" controlId="formBasicDisc">
-          <Form.Label>Gambar Produk Paket</Form.Label>
+          <Form.Label>
+            Gambar Produk Paket{" "}
+            {/* <small style={{ color: "red" }}>
+              *upload gambar jika ingin update gambar
+            </small>{" "} */}
+          </Form.Label>
           <Form.Control
             required
             type="file"
@@ -198,7 +241,7 @@ function FormPaket() {
             type="text"
             name="nama_paket"
             placeholder="Tuliskan nama paket"
-            // value={email}
+            value={inputs.nama_paket}
             onChange={handleChange}
           />
           <Form.Text className="text-muted"></Form.Text>
@@ -211,7 +254,7 @@ function FormPaket() {
             type="number"
             name="kecepatan"
             placeholder="Kecepatan internet"
-            // value={email}
+            value={inputs.kecepatan}
             onChange={handleChange}
           />
           <Form.Text className="text-muted"></Form.Text>
@@ -224,7 +267,7 @@ function FormPaket() {
             type="number"
             name="harga"
             placeholder="Harga Paket"
-            // value={email}
+            value={inputs.harga}
             onChange={handleChange}
           />
           <Form.Text className="text-muted"></Form.Text>
@@ -236,7 +279,7 @@ function FormPaket() {
             type="number"
             name="disc"
             placeholder="Apakah ada diskon?"
-            // value={email}
+            value={inputs.disc}
             onChange={handleChange}
           />
           <Form.Text className="text-muted"></Form.Text>
@@ -249,7 +292,7 @@ function FormPaket() {
             required
             type="number"
             name="status"
-            // value={email}
+            value={inputs.status}
             onChange={handleChange}
           >
             <option value="">-- Pilih Status --</option>
